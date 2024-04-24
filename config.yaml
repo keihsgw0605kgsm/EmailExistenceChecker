@@ -1,5 +1,0 @@
-smtp:
-  host: smtp.example.com
-  auth:
-    user: hogehoge@example.com
-    pass: your-app-password
