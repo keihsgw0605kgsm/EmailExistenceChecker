@@ -1,14 +1,14 @@
-const nodemailer = require('nodemailer');
-const express = require('express');
 const fs = require('fs');
 const yaml = require('js-yaml');
+const nodemailer = require('nodemailer');
+const express = require('express');
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
 app.use(express.static('.'));
 
-// YAMLファイルから設定を読み込み、それを返す関数
+// 設定を読み込む関数
 function loadConfig(path) {
   try {
     const fileContents = fs.readFileSync(path, 'utf8');
@@ -16,23 +16,25 @@ function loadConfig(path) {
     return config;
   } catch (e) {
     console.error('Failed to load config file:', e);
-    return null;  // エラーが発生した場合はnullを返す
+    return null;
   }
 }
+
 // 設定ファイルからSMTP設定を読み込む
-const config = loadConfig('./config.yml');
+const config = loadConfig('./config.yaml');
 if (!config) {
   console.error('Failed to load SMTP configuration');
   process.exit(1); // 設定が読み込めない場合はアプリケーションを終了
 }
 
+// トランスポーターを設定する
 const transporter = nodemailer.createTransport({
     host: config.smtp.host,
     port: 587,
     secure: false, // true の場合は、ポート465を使用
     auth: {
-        user: config.smtp.auth.user,
-        pass: config.smtp.auth.pass
+        user: config.smtp.auth.user, // あなたのGmailアドレス
+        pass: config.smtp.auth.pass // アプリケーション固有のパスワード
     }
 });
 
@@ -41,21 +43,21 @@ app.post('/verify_email', (req, res) => {
     transporter.verify((error, success) => {
         if (error) {
             console.error('SMTP connection error:', error);
-            res.status(500).send('SMTP server connection error.');
+            res.status(500).json({message: 'SMTP server connection error.'});
         } else {
             console.log('Connection to SMTP server established successfully.');
             // メールアドレスの存在確認
             transporter.sendMail({
-                from: config.smtp.auth.user, // 送信者アドレス
-                to: email, // 受信者アドレス
-                subject: 'Hello', // 任意の件名
+                from: config.smtp.auth.user, // 設定から送信者アドレスを取得
+                to: email,
+                subject: 'Hello',
             }, (err, info) => {
                 if (err) {
                     console.error('Email not accepted for delivery:', err);
-                    res.status(400).send('Email address not valid.');
+                    res.status(400).json({message: 'Email address not valid.'});
                 } else {
                     console.log('Email accepted for delivery:', info);
-                    res.send('Email address is valid.');
+                    res.json({message: 'Email address is valid.'});
                 }
             });
         }
