@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Address Verification</title>
+</head>
+<body>
+    <h1>Email Address Verification</h1>
+    <form id="emailForm">
+        <input type="email" id="emailInput" placeholder="Enter email address" required>
+        <button type="button" onclick="verifyEmail()">Verify Email Address</button>
+    </form>
+    <script>
+        function verifyEmail() {
+            const email = document.getElementById('emailInput').value;
+            fetch('/verify-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Response: ' + data.message);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Failed to verify email.');
+            });
+        }
+    </script>
+</body>
+</html>
