@@ -1,1 +1,3 @@
 # EmailExistenceChecker
+
+SMTPサーバーを用いて特定のEmailが存在するかチェックするWebアプリケーション
